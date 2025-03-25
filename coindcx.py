@@ -6,7 +6,7 @@ import time
 st.set_page_config(page_title="Crypto Explosion Predictor", layout="wide")
 st.title("🚀 Crypto Explosion Predictor")
 
-@st.cache_data(ttl=30)  # Cache data for 30 seconds to avoid excessive API calls
+@st.cache_data(ttl=30)  # Cache data for 30 seconds to reduce API calls
 def fetch_coindcx_data():
     url = "https://api.coindcx.com/exchange/ticker"
     response = requests.get(url)
@@ -26,6 +26,11 @@ def calculate_stop_loss(price, change):
     stop_loss_factor = 0.95 if change > 8 else 0.90
     return round(price * stop_loss_factor, 2)
 
+def calculate_volatility(change, volume):
+    # Volatility percentage calculation (Relative Change * Volume Impact)
+    volatility = abs(change) * (1 + (volume / 10000000))  
+    return round(volatility, 2)
+
 def analyze_market(data):
     potential_explosions = []
     for coin in data:
@@ -38,12 +43,20 @@ def analyze_market(data):
             if change > 5 and volume > 500000:
                 target_price = calculate_target_price(price, change, volume)
                 stop_loss_price = calculate_stop_loss(price, change)
-                trade_decision = "✅ Strong Buy" if change > 8 else "⚠️ Moderate Buy"
+                volatility = calculate_volatility(change, volume)
+
+                # Decision-making using volatility
+                if volatility > 20:
+                    trade_decision = "🔥 High Volatility - Enter with Caution"
+                elif volatility > 10:
+                    trade_decision = "✅ Strong Buy"
+                else:
+                    trade_decision = "⚠️ Moderate Buy"
 
                 potential_explosions.append({
-                    "Symbol": symbol, "Price": price, "24h Change (%)": change, 
-                    "Volume": volume, "Target Price": target_price, 
-                    "Stop Loss Price": stop_loss_price, 
+                    "Symbol": symbol, "Price": price, "24h Change (%)": change,
+                    "Volume": volume, "Volatility (%)": volatility,
+                    "Target Price": target_price, "Stop Loss Price": stop_loss_price, 
                     "Trade Decision": trade_decision
                 })
         except ValueError:
