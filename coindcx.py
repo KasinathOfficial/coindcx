@@ -71,19 +71,6 @@ if data:
         df = pd.DataFrame(analyzed_data)
         st.subheader("📈 Cryptos Likely to Explode Soon")
         st.dataframe(df)
-
-        search_query = st.text_input("🔍 Search Crypto Symbol:")
-        df_selected = pd.DataFrame()
-        
-        if search_query:
-            searched_df = df[df["Symbol"].str.contains(search_query, case=False, na=False)]
-            if not searched_df.empty:
-                df_selected = searched_df.drop_duplicates().reset_index(drop=True)
-        
-        if not df_selected.empty:
-            df_selected["Suggestion"] = df_selected["24h Change (%)"].apply(lambda x: "Hold" if x > 10 else "Sell")
-            st.subheader(f"✅ Selected Cryptos ({len(df_selected)})")
-            st.dataframe(df_selected)
     else:
         st.info("No potential explosive cryptos detected right now.")
 else:
