@@ -10,7 +10,7 @@ st.title("🚀 Crypto Explosion Predictor")
 def fetch_coindcx_data():
     url = "https://api.coindcx.com/exchange/ticker"
     response = requests.get(url)
-    
+
     if response.status_code == 200:
         data = response.json()
         return [coin for coin in data if coin['market'].endswith('INR')]  # Filter INR pairs
