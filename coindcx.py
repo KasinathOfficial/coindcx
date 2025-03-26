@@ -6,7 +6,7 @@ import time
 st.set_page_config(page_title="Crypto Explosion Predictor", layout="wide")
 st.title("🚀 Crypto Explosion Predictor")
 
-@st.cache_data(ttl=30)  # Cache data for 30 seconds to reduce API calls
+@st.cache_data(ttl=5)  # Cache data for 30 seconds to reduce API calls
 def fetch_coindcx_data():
     url = "https://api.coindcx.com/exchange/ticker"
     response = requests.get(url)
@@ -77,5 +77,5 @@ else:
     st.error("Failed to retrieve data. Please check API access.")
 
 # Auto-refresh every 30 seconds
-time.sleep(30)
+time.sleep(5)
 st.rerun()
