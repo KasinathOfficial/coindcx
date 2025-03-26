@@ -72,7 +72,7 @@ if data:
         st.subheader("📈 Cryptos Likely to Explode Soon")
         st.dataframe(df)
 
-search_query = st.text_input("🔍 Search Crypto Symbol:")
+        search_query = st.text_input("🔍 Search Crypto Symbol:")
         df_selected = pd.DataFrame()
         
         if search_query:
