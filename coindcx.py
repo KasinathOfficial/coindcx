@@ -6,7 +6,7 @@ import time
 st.set_page_config(page_title="Crypto Explosion Predictor", layout="wide")
 st.title("🚀 Crypto Explosion Predictor")
 
-@st.cache_data(ttl=1)  # Cache data for 30 seconds to reduce API calls
+@st.cache_data(ttl=30)  # Cache data for 30 seconds to reduce API calls
 def fetch_coindcx_data():
     url = "https://api.coindcx.com/exchange/ticker"
     response = requests.get(url)
