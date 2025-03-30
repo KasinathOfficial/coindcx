@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import time
+import random  # Simulating win probability for now; later, replace with AI model
 
 st.set_page_config(page_title="Crypto Explosion Predictor", layout="wide")
 st.title("🚀 Crypto Explosion Predictor")
@@ -28,6 +29,13 @@ def calculate_stop_loss(price, change):
 def calculate_volatility(change, volume):
     return round(abs(change) * (1 + (volume / 10000000)), 2)
 
+def calculate_win_probability(change, volume):
+    base_win_rate = 50  # Base probability of a trade winning (can be adjusted)
+    momentum_boost = min(change * 2, 20)  # More change = Higher probability (Capped at 20%)
+    volume_boost = min((volume / 10000000) * 10, 30)  # More volume = Higher probability (Capped at 30%)
+    total_probability = base_win_rate + momentum_boost + volume_boost
+    return round(min(total_probability, 95), 2)  # Capping at 95% confidence
+
 def analyze_market(data):
     potential_explosions = []
     for coin in data:
@@ -41,19 +49,20 @@ def analyze_market(data):
                 target_price = calculate_target_price(price, change, volume)
                 stop_loss_price = calculate_stop_loss(price, change)
                 volatility = calculate_volatility(change, volume)
+                win_probability = calculate_win_probability(change, volume)
 
-                if volatility > 20:
-                    trade_decision = "🔥 High Volatility - Enter with Caution"
-                elif volatility > 10:
-                    trade_decision = "✅ Strong Buy"
+                if win_probability > 80:
+                    trade_decision = "🔥 High Confidence Buy (Win %: {}%)".format(win_probability)
+                elif win_probability > 65:
+                    trade_decision = "✅ Strong Buy (Win %: {}%)".format(win_probability)
                 else:
-                    trade_decision = "⚠️ Moderate Buy"
+                    trade_decision = "⚠️ Moderate Buy (Win %: {}%)".format(win_probability)
 
                 potential_explosions.append({
                     "Symbol": symbol, "Price": price, "24h Change (%)": change,
                     "Volume": volume, "Volatility (%)": volatility,
                     "Target Price": target_price, "Stop Loss Price": stop_loss_price,
-                    "Trade Decision": trade_decision
+                    "Win Probability (%)": win_probability, "Trade Decision": trade_decision
                 })
         except (ValueError, KeyError):
             continue
@@ -75,4 +84,5 @@ while True:
     else:
         with placeholder.container():
             st.error("Failed to retrieve data. Please check API access.")
+    
     time.sleep(1)  # Refresh data every second without refreshing the page
