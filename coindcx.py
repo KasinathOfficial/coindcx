@@ -36,6 +36,9 @@ def calculate_win_probability(change, volume):
     total_probability = base_win_rate + momentum_boost + volume_boost
     return round(min(total_probability, 95), 2)  # Capping at 95% confidence
 
+def calculate_best_buy_price(price):
+    return round(price * 0.98, 2)  # Buy price at a 2% discount for better entry
+
 def analyze_market(data):
     potential_explosions = []
     for coin in data:
@@ -50,6 +53,7 @@ def analyze_market(data):
                 stop_loss_price = calculate_stop_loss(price, change)
                 volatility = calculate_volatility(change, volume)
                 win_probability = calculate_win_probability(change, volume)
+                best_buy_price = calculate_best_buy_price(price)
 
                 if win_probability > 80:
                     trade_decision = "🔥 High Confidence Buy (Win %: {}%)".format(win_probability)
@@ -59,8 +63,8 @@ def analyze_market(data):
                     trade_decision = "⚠️ Moderate Buy (Win %: {}%)".format(win_probability)
 
                 potential_explosions.append({
-                    "Symbol": symbol, "Price": price, "24h Change (%)": change,
-                    "Volume": volume, "Volatility (%)": volatility,
+                    "Symbol": symbol, "Price": price, "Best Price to Buy": best_buy_price,
+                    "24h Change (%)": change, "Volume": volume, "Volatility (%)": volatility,
                     "Target Price": target_price, "Stop Loss Price": stop_loss_price,
                     "Win Probability (%)": win_probability, "Trade Decision": trade_decision
                 })
