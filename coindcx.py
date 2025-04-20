@@ -2,7 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import time
-import random  # Simulating win probability for now; later, replace with AI model
+import random  # Simulating win probability and average volume
 
 st.set_page_config(page_title="Crypto Explosion Predictor", layout="wide")
 st.title("🚀 Crypto Explosion Predictor")
@@ -30,14 +30,25 @@ def calculate_volatility(change, volume):
     return round(abs(change) * (1 + (volume / 10000000)), 2)
 
 def calculate_win_probability(change, volume):
-    base_win_rate = 50  # Base probability of a trade winning (can be adjusted)
-    momentum_boost = min(change * 2, 20)  # More change = Higher probability (Capped at 20%)
-    volume_boost = min((volume / 10000000) * 10, 30)  # More volume = Higher probability (Capped at 30%)
+    base_win_rate = 50  # Base probability of a trade winning
+    momentum_boost = min(change * 2, 20)  # Cap at 20%
+    volume_boost = min((volume / 10000000) * 10, 30)  # Cap at 30%
     total_probability = base_win_rate + momentum_boost + volume_boost
-    return round(min(total_probability, 95), 2)  # Capping at 95% confidence
+    return round(min(total_probability, 95), 2)  # Cap at 95%
 
 def calculate_best_buy_price(price):
-    return round(price * 0.98, 2)  # Buy price at a 2% discount for better entry
+    return round(price * 0.98, 2)  # Buy at 2% discount
+
+def get_volume_type(change, current_volume):
+    # Simulated average volume between 60–90% of current volume
+    avg_volume = current_volume * random.uniform(0.6, 0.9)
+
+    if current_volume > avg_volume * 1.2:  # Significant spike
+        if change > 0:
+            return "Bullish"
+        elif change < 0:
+            return "Bearish"
+    return "Neutral"
 
 def analyze_market(data):
     potential_explosions = []
@@ -55,18 +66,27 @@ def analyze_market(data):
                 win_probability = calculate_win_probability(change, volume)
                 best_buy_price = calculate_best_buy_price(price)
 
+                volume_type = get_volume_type(change, volume)
+
                 if win_probability > 80:
-                    trade_decision = "🔥 High Confidence Buy (Win %: {}%)".format(win_probability)
+                    trade_decision = "🔥 High Confidence Buy "
                 elif win_probability > 65:
-                    trade_decision = "✅ Strong Buy (Win %: {}%)".format(win_probability)
+                    trade_decision = "✅ Strong Buy "
                 else:
-                    trade_decision = "⚠️ Moderate Buy (Win %: {}%)".format(win_probability)
+                    trade_decision = "⚠️ Moderate Buy "
 
                 potential_explosions.append({
-                    "Symbol": symbol, "Price": price, "Best Price to Buy": best_buy_price,
-                    "24h Change (%)": change, "Volume": volume, "Volatility (%)": volatility,
-                    "Target Price": target_price, "Stop Loss Price": stop_loss_price,
-                    "Win Probability (%)": win_probability, "Trade Decision": trade_decision
+                    "Symbol": symbol,
+                    "Price": price,
+                    "Best Price to Buy": best_buy_price,
+                    "24h Change (%)": change,
+                    "Volume": volume,
+                    "Volume Type": volume_type,
+                    "Volatility (%)": volatility,
+                    "Target Price": target_price,
+                    "Stop Loss Price": stop_loss_price,
+                    "Win Probability (%)": win_probability,
+                    "Trade Decision": trade_decision
                 })
         except (ValueError, KeyError):
             continue
@@ -88,5 +108,5 @@ while True:
     else:
         with placeholder.container():
             st.error("Failed to retrieve data. Please check API access.")
-    
-    time.sleep(1)  # Refresh data every second without refreshing the page
+
+    time.sleep(1)  # Auto-refresh every second
