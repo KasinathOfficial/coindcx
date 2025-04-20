@@ -85,7 +85,7 @@ def analyze_market(data):
                     "Volatility (%)": volatility,
                     "Target Price": target_price,
                     "Stop Loss Price": stop_loss_price,
-                    "Win Probability (%)": win_probability,
+                    "Win (%)": win_probability,
                     "Trade Decision": trade_decision
                 })
         except (ValueError, KeyError):
